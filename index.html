@@ -170,7 +170,7 @@ function wl(t){return "https://wa.me/"+WA+"?text="+encodeURIComponent(t)}
 var who=g||"un invitado";
 $("yes").href=wl("¡Hola! Soy "+who+" y confirmo mi asistencia a la Posada del Grupo 71EL el 19 de diciembre. Asistiremos ___ personas. 🎄");
 $("no").href=wl("¡Hola! Soy "+who+". Lamentablemente no podré asistir a la posada del 19 de diciembre. ¡Les deseo una gran fiesta!");
-// Música (villancico generado con Web Audio, sin archivos)
+// Música: SantaTellMe.mp3 (si no existe, suena un villancico generado)
 var N={C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392},B=.36,ctx=null,tm=null,mg;
 var M=[["E4",1],["E4",1],["E4",2],["E4",1],["E4",1],["E4",2],["E4",1],["G4",1],["C4",1.5],["D4",.5],["E4",4],
 ["F4",1],["F4",1],["F4",1.5],["F4",.5],["F4",1],["E4",1],["E4",1],["E4",.5],["E4",.5],["E4",1],["D4",1],["D4",1],["E4",1],["D4",2],["G4",2]];
@@ -180,10 +180,12 @@ function nt(f,t,d){var l=Math.max(d*1.5,.6);[[f,.5,"triangle"],[f*2,.15,"sine"]]
  o.connect(g);g.connect(mg);o.start(t);o.stop(t+l+.05)})}
 function loop(){var t=ctx.currentTime+.05;M.forEach(function(n){var d=n[1]*B;nt(N[n[0]],t,d);t+=d});
  tm=setTimeout(loop,(t-ctx.currentTime+1.5)*1000)}
-$("mus").onclick=function(){var b=this,on=!ctx;b.classList.remove("pulse");
- if(on){var A=window.AudioContext||window.webkitAudioContext;if(!A)return;ctx=new A();mg=ctx.createGain();mg.gain.value=.22;mg.connect(ctx.destination);loop();b.textContent="⏸ Pausar música"}
- else{clearTimeout(tm);ctx.close();ctx=null;b.textContent="🎵 Música"}
- b.setAttribute("aria-pressed",on)};
+var au=new Audio("SantaTellMe.mp3");au.loop=true;au.preload="auto";
+function synth(){var A=window.AudioContext||window.webkitAudioContext;if(!A||ctx)return;ctx=new A();mg=ctx.createGain();mg.gain.value=.22;mg.connect(ctx.destination);loop()}
+$("mus").onclick=function(){var b=this;b.classList.remove("pulse");
+ if(ctx||!au.paused){clearTimeout(tm);if(ctx){ctx.close();ctx=null}au.pause();b.textContent="🎵 Música";b.setAttribute("aria-pressed","false");return}
+ b.textContent="⏸ Pausar música";b.setAttribute("aria-pressed","true");
+ var r=au.play();if(r&&r.catch)r.catch(synth)};
 // Nieve
 (function(){var c=$("snow"),x=c.getContext("2d"),F=[],W,H,R=matchMedia("(prefers-reduced-motion:reduce)").matches;
  function rs(){W=c.width=innerWidth;H=c.height=innerHeight}rs();addEventListener("resize",rs);
